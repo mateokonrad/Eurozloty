@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konwerter EUR ⇄ PLN</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    width:350px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+input, select, button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+}
+
+button{
+    background:#0078d7;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#005ea6;
+}
+
+#result{
+    margin-top:20px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+#rate{
+    margin-top:10px;
+    color:#666;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>💱 EUR ⇄ PLN</h2>
+
+    <input type="number" id="amount" placeholder="Kwota" value="100">
+
+    <select id="direction">
+        <option value="EURPLN">EUR → PLN</option>
+        <option value="PLNEUR">PLN → EUR</option>
+    </select>
+
+    <button onclick="convert()">Przelicz</button>
+
+    <div id="rate">Pobieranie kursu...</div>
+    <div id="result"></div>
+</div>
+
+<script>
+let eurPln = null;
+
+async function loadRate() {
+    try {
+
+        // Darmowe API bazujące na danych ECB
+        const res = await fetch(
+            "https://api.frankfurter.app/latest?from=EUR&to=PLN"
+        );
+
+        const data = await res.json();
+
+        eurPln = data.rates.PLN;
+
+        document.getElementById("rate").innerHTML =
+            `1 EUR = ${eurPln.toFixed(4)} PLN`;
+    } catch(e) {
+        document.getElementById("rate").innerHTML =
+            "Nie udało się pobrać kursu.";
+    }
+}
+
+function convert() {
+
+    if(!eurPln){
+        alert("Kurs jeszcze się ładuje.");
+        return;
+    }
+
+    const amount = parseFloat(
+        document.getElementById("amount").value
+    );
+
+    const direction =
+        document.getElementById("direction").value;
+
+    let result;
+
+    if(direction === "EURPLN"){
+        result = amount * eurPln;
+        document.getElementById("result").innerHTML =
+            `${amount} EUR = ${result.toFixed(2)} PLN`;
+    } else {
+        result = amount / eurPln;
+        document.getElementById("result").innerHTML =
+            `${amount} PLN = ${result.toFixed(2)} EUR`;
+    }
+}
+
+loadRate();
+</script>
+
+</body>
+</html>
